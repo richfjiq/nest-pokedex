@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import axios, { AxiosInstance } from 'axios';
 
 import { Model } from 'mongoose';
@@ -21,35 +17,27 @@ export class SeedService {
   ) {}
 
   async executeSeed() {
+    await this.pokemonModel.deleteMany({});
+
     const { data } = await this.axios.get<PokeResponse>(
-      'https://pokeapi.co/api/v2/pokemon?limit=10',
+      'https://pokeapi.co/api/v2/pokemon?limit=650',
     );
-    data.results.forEach(async ({ name, url }) => {
+
+    const pokemonToInsert: { name: string; no: number }[] = [];
+    // const insertPromisesArray = [];
+
+    data.results.forEach(({ name, url }) => {
       const segments = url.split('/');
       const no: number = +segments[segments.length - 2];
 
-      try {
-        const pokemon = await this.pokemonModel.create({
-          name,
-          no,
-        });
-        console.log({ pokemon });
-      } catch (error) {
-        console.log({ error });
-        this.handleExceptions(error);
-      }
+      pokemonToInsert.push({ name, no });
+      // insertPromisesArray.push(this.pokemonModel.create({ name, no }));
     });
-    return data.results;
-  }
 
-  private handleExceptions(error: any) {
-    if (error.code === 11000) {
-      throw new BadRequestException(
-        `Pokemon already exists in db ${JSON.stringify(error.keyValue)}`,
-      );
-    }
-    throw new InternalServerErrorException(
-      `Can't create Pokemon - Check server logs`,
-    );
+    // Recommended
+    await this.pokemonModel.insertMany(pokemonToInsert);
+    // await Promise.all(insertPromisesArray);
+
+    return 'Seed executed.';
   }
 }
