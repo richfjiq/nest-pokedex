@@ -23,7 +23,21 @@ npm i -g @nestjs/cli
 docker-compose up -d
 ```
 
-5. Rebuild data base with the seed
+5. Clone the file **.env.template** and rename to **.env**
+
+6. Write the environment variables in
+
+```
+.env
+```
+
+7. Run app in dev:
+
+```
+yarn start:dev
+```
+
+8. Rebuild data base with the seed
 
 ```
 http://localhost:3000/api/v2/seed
@@ -33,3 +47,10 @@ http://localhost:3000/api/v2/seed
 
 - MongoDB
 - Nest.js
+
+# Notes
+
+```
+git commit --allow-empty -m "Trigger heroku deploy"
+git push heroku main
+```
